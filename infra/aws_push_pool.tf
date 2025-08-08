@@ -1,5 +1,18 @@
+
+variable "aws_access_key_id" {
+  description = "The AWS access key ID"
+  type        = string
+}
+
+variable "aws_secret_access_key" {
+  description = "The AWS secret access key"
+  type        = string
+}
+
 provider "aws" {
-  region = "eu-west-2"
+  region     = "eu-west-2"
+  access_key = var.aws_access_key_id
+  secret_key = var.aws_secret_access_key
 }
 
 resource "aws_iam_user" "prefect-ecs-user" {
@@ -14,8 +27,8 @@ resource "aws_iam_user_policy" "prefect-ecs-policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "ecs:DescribeClusters",
           "ecs:ListClusters",
           "ecs:RegisterTaskDefinition",
@@ -50,6 +63,6 @@ output "prefect-aws-access-key-id" {
 }
 
 output "prefect-aws-secret-access-key" {
-  value = aws_iam_access_key.prefect-ecs-access-key.secret
+  value     = aws_iam_access_key.prefect-ecs-access-key.secret
   sensitive = true
 }
