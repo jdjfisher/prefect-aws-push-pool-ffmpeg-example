@@ -52,6 +52,7 @@ resource "aws_iam_access_key" "prefect-ecs-access-key" {
 
 resource "aws_ecr_repository" "prefect-ecs-repo" {
   name = "prefect-flows"
+  force_delete = true
 }
 
 resource "aws_ecs_cluster" "prefect-ecs-cluster" {
