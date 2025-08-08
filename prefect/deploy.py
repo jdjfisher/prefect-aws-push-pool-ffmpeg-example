@@ -7,6 +7,7 @@ def main():
         work_pool_name="aws-push-pool",
         image=DockerImage(
             name="poc-example:latest",
+            dockerfile="Dockerfile",
             platform="linux/amd64",
         )
     )
