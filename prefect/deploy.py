@@ -1,4 +1,4 @@
-from flow import example_flow
+from flow import trim_video
 from prefect.docker import DockerImage
 import os
 import subprocess
@@ -17,8 +17,8 @@ def main():
         check=True,
     )
 
-    example_flow.deploy(
-        name="poc-example",
+    trim_video.deploy(
+        name="poc-trim-video",
         work_pool_name="aws-push-pool",
         image=DockerImage(
             name=image,
