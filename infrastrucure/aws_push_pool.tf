@@ -96,7 +96,6 @@ resource "aws_iam_role_policy" "prefect-ecs-task-run-policy" {
 
 resource "aws_iam_access_key" "prefect-ecs-access-key" {
   user = aws_iam_user.prefect-ecs-user.name
-
 }
 
 resource "aws_ecr_repository" "prefect-ecs-repo" {
