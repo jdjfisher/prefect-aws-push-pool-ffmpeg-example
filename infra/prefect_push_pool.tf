@@ -35,8 +35,6 @@ resource "prefect_work_pool" "aws_push_pool" {
   type         = "ecs:push"
   workspace_id = var.prefect_workspace_id
   base_job_template = jsonencode({
-
-
     "job_configuration" : {
       "command" : "{{ command }}",
       "env" : "{{ env }}",
@@ -125,6 +123,11 @@ resource "prefect_work_pool" "aws_push_pool" {
         "aws_credentials" : {
           "title" : "AWS Credentials",
           "description" : "The AWS credentials to use to connect to ECS. `aws_access_key_id`, `aws_secret_access_key` and `region_name` are required.",
+          "default" : {
+            "$ref" : {
+              block_document_id = prefect_block.aws_push_pool.id
+            }
+          },
           "anyOf" : [
             {
               "$ref" : "#/definitions/AwsCredentials"
@@ -272,22 +275,96 @@ resource "prefect_work_pool" "aws_push_pool" {
           }
         },
         "AwsCredentials" : {
-          "title" : "AwsCredentials",
-          "description" : "Block used to manage authentication with AWS. `aws_access_key_id`, `aws_secret_access_key` and `region_name` are required. AWS authentication is handled via the `boto3` module. For more information refer to the \n[boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).",
           "type" : "object",
-          aws_credentials = {
-            title = "AWS Credentials"
-            type  = "object"
-            default = {
-              "$ref" = {
-                block_document_id = prefect_block.aws_push_pool.id
-              }
+          "title" : "AwsCredentials",
+          "properties" : {
+            "region_name" : {
+              "type" : "string",
+              "title" : "Region Name",
+              "description" : "The AWS Region where you want to create new connections."
+            },
+            "profile_name" : {
+              "type" : "string",
+              "title" : "Profile Name",
+              "description" : "The profile to use when creating your session."
+            },
+            "aws_access_key_id" : {
+              "type" : "string",
+              "title" : "AWS Access Key ID",
+              "description" : "A specific AWS access key ID."
+            },
+            "aws_session_token" : {
+              "type" : "string",
+              "title" : "AWS Session Token",
+              "description" : "The session key for your AWS account. This is only needed when you are using temporary credentials."
+            },
+            "aws_client_parameters" : {
+              "title" : "AWS Client Parameters",
+              "description" : "Extra parameters to initialize the Client.",
+              "allOf" : [
+                {
+                  "type" : "object",
+                  "title" : "AwsClientParameters",
+                  "description" : "Model used to manage extra parameters that you can pass when you initialize\nthe Client. If you want to find more information, see\n[boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html)\nfor more info about the possible client configurations.\n\nAttributes:\n    api_version: The API version to use. By default, botocore will\n        use the latest API version when creating a client. You only need\n        to specify this parameter if you want to use a previous API version\n        of the client.\n    use_ssl: Whether or not to use SSL. By default, SSL is used.\n        Note that not all services support non-ssl connections.\n    verify: Whether or not to verify SSL certificates. By default\n        SSL certificates are verified. If False, SSL will still be used\n        (unless use_ssl is False), but SSL certificates\n        will not be verified. Passing a file path to this is deprecated.\n    verify_cert_path: A filename of the CA cert bundle to\n        use. You can specify this argument if you want to use a\n        different CA cert bundle than the one used by botocore.\n    endpoint_url: The complete URL to use for the constructed\n        client. Normally, botocore will automatically construct the\n        appropriate URL to use when communicating with a service. You\n        can specify a complete URL (including the \"http/https\" scheme)\n        to override this behavior. If this value is provided,\n        then ``use_ssl`` is ignored.\n    config: Advanced configuration for Botocore clients. See\n        [botocore docs](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)\n        for more details.",
+                  "properties" : {
+                    "config" : {
+                      "type" : "object",
+                      "title" : "Botocore Config",
+                      "description" : "Advanced configuration for Botocore clients."
+                    },
+                    "verify" : {
+                      "title" : "Verify",
+                      "default" : true,
+                      "description" : "Whether or not to verify SSL certificates.",
+                      "anyOf" : [
+                        {
+                          "type" : "boolean"
+                        },
+                        {
+                          "type" : "string",
+                          "format" : "file-path"
+                        }
+                      ]
+                    },
+                    "use_ssl" : {
+                      "type" : "boolean",
+                      "title" : "Use SSL",
+                      "default" : true,
+                      "description" : "Whether or not to use SSL."
+                    },
+                    "api_version" : {
+                      "type" : "string",
+                      "title" : "API Version",
+                      "description" : "The API version to use."
+                    },
+                    "endpoint_url" : {
+                      "type" : "string",
+                      "title" : "Endpoint URL",
+                      "description" : "The complete URL to use for the constructed client."
+                    },
+                    "verify_cert_path" : {
+                      "type" : "string",
+                      "title" : "Certificate Authority Bundle File Path",
+                      "format" : "file-path",
+                      "description" : "Path to the CA cert bundle to use."
+                    }
+                  }
+                }
+              ]
+            },
+            "aws_secret_access_key" : {
+              "type" : "string",
+              "title" : "AWS Access Key Secret",
+              "format" : "password",
+              "writeOnly" : true,
+              "description" : "A specific AWS secret access key."
             }
-          }
-          "block_type_slug" : "aws-credentials",
+          },
+          "description" : "Block used to manage authentication with AWS. `aws_access_key_id`, `aws_secret_access_key` and `region_name` are required. AWS authentication is handled via the `boto3` module. For more information refer to the \n[boto3 docs](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html).",
           "secret_fields" : [
             "aws_secret_access_key"
           ],
+          "block_type_slug" : "aws-credentials",
           "block_schema_references" : {}
         },
         "OidcAwsCredentials" : {
