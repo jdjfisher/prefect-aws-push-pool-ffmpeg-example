@@ -19,8 +19,8 @@ resource "aws_iam_user" "prefect-ecs-user" {
   name = "prefect-ecs-user"
 }
 
-resource "aws_iam_user_policy" "prefect-ecs-policy" {
-  name = "prefect-ecs-policy"
+resource "aws_iam_user_policy" "prefect-ecs-task-run-creation-policy" {
+  name = "prefect-ecs-task-run-creation-policy"
   user = aws_iam_user.prefect-ecs-user.name
 
   policy = jsonencode({
@@ -37,9 +37,58 @@ resource "aws_iam_user_policy" "prefect-ecs-policy" {
           "ecs:RunTask",
           "ecs:StopTask",
           "ecs:DescribeTasks",
-          "ecs:ListTasks",
+          "ecs:TagResource",
+          "ecs:DescribeTaskDefinition",
+          "iam:PassRole",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets"
         ]
         Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role" "prefect-ecs-task-run-role" {
+  name = "prefect-ecs-task-run-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "prefect-ecs-task-run-policy" {
+  name = "prefect-ecs-task-run-policy"
+  role = aws_iam_role.prefect-ecs-task-run-role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:DescribeImages",
+        ]
+        Resource = aws_ecr_repository.prefect-ecs-repo.arn
       },
     ]
   })

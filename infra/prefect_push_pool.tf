@@ -140,7 +140,8 @@ resource "prefect_work_pool" "aws_push_pool" {
         "cluster" : {
           "title" : "Cluster",
           "description" : "The ECS cluster to run the task in. An ARN or name may be provided. If not provided, the default cluster will be used.",
-          "type" : "string"
+          "type" : "string",
+          "default" : aws_ecs_cluster.prefect-ecs-cluster.arn
         },
         "family" : {
           "title" : "Family",
@@ -187,7 +188,8 @@ resource "prefect_work_pool" "aws_push_pool" {
         "execution_role_arn" : {
           "title" : "Execution Role ARN",
           "description" : "An execution role to use for the task. This controls the permissions of the task when it is launching. If this value is not null, it will override the value in the task definition. An execution role must be provided to capture logs from the container.",
-          "type" : "string"
+          "type" : "string",
+          "default" : aws_iam_role.prefect-ecs-task-run-role.arn
         },
         "vpc_id" : {
           "title" : "VPC ID",
