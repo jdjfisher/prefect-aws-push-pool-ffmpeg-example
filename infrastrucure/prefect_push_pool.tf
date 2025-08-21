@@ -51,7 +51,11 @@ resource "prefect_work_pool" "aws_push_pool" {
         "cpu" : "{{ cpu }}",
         "family" : "{{ family }}",
         "memory" : "{{ memory }}",
-        "executionRoleArn" : "{{ execution_role_arn }}"
+        "executionRoleArn" : "{{ execution_role_arn }}",
+        "runtimePlatform": {
+          "cpuArchitecture": "ARM64",
+          "operatingSystemFamily": "LINUX"
+        }
       },
       "task_run_request" : {
         "launchType" : "{{ launch_type }}",

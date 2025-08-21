@@ -1,7 +1,6 @@
 from flow import trim_video
 from prefect.docker import DockerImage
 import os
-import subprocess
 
 def main():
     registry = os.getenv('DOCKER_REGISTRY');
@@ -11,20 +10,15 @@ def main():
 
     image = f"{registry}/prefect-flows:latest"
 
-    # Manually running buildx for amd64 
-    subprocess.run(
-        ["docker", "buildx", "build", '--platform', "linux/amd64", "-t", image, ".", '--push'],
-        check=True,
-    )
-
     trim_video.deploy(
         name="poc-trim-video",
         work_pool_name="aws-push-pool",
+        build=True,
         image=DockerImage(
             name=image,
             dockerfile="Dockerfile",
+            platform="linux/arm64"
         ),
-        build=False,
     )
 
 
